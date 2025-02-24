@@ -16,6 +16,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/auth",authRoutes);
 app.use("/api/v1/users",userRoutes);
+app.use("/api/v1/posts",postRoutes);
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
