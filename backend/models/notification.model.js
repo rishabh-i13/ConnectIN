@@ -5,7 +5,7 @@ const notificationSchema = new mongoose.Schema(
         recipients:[{type: mongoose.Schema.Types.ObjectId, ref:"User",required:true}],
         type:{
             type:String,
-            enum:["like","comment",connectionAccepted],
+            enum:["like","comment","connectionAccepted"],
             required:true
         },
         relatedUser:{type: mongoose.Schema.Types.ObjectId, ref:"User"},
