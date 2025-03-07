@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const  protectRoute=async (req,res,next)=>{
+export const protectRoute=async (req,res,next)=>{
     try {
         const token=req.cookies["jwt-connectin"];
         if(!token){
