@@ -158,34 +158,38 @@ export const removeConnection=async(req,res)=>{
     }
 }
 
-export const getConnectionStatus=async(req,res)=>{
-    try {
-        const targetUserId=req.params.userId;
-        const currentUserId=req.user._id;   
+    export const getConnectionStatus=async(req,res)=>{
+        try {
+            const targetUserId=req.params.userId;
+            const currentUserId=req.user._id;   
 
-        const currentUser= req.user;
-        if(currentUser.connections.includes(targetUserId)){
-            return res.status(200).json({status:"connected"});
-        }
-
-        const pendingRequest=await ConnectionRequest.findOne({
-            $or:[
-                {sender:currentUserId,recipient:targetUserId,status:"pending"},
-                {sender:targetUserId,recipient:currentUserId,status:"pending"},
-            ],
-            status:"pending",
-        });
-        if(pendingRequest){
-            if(pendingRequest.sender.toString()===currentUserId){
-                return res.status(200).json({status:"requestSent"});
-            }else{
-                return res.status(200).json({status:"requestReceived"});
+            const currentUser= req.user;
+            if(currentUser.connections.includes(targetUserId)){
+                return res.status(200).json({status:"connected"});
             }
-        }
 
-        res.status(200).json({status:"notConnected"}); 
-    } catch (error) {
-        console.log("Error in Get Connection Status",error.message);
-        res.status(500).json({message:"Internal Server Error"});
+            const pendingRequest=await ConnectionRequest.findOne({
+                $or:[
+                    {sender:currentUserId,recipient:targetUserId,status:"pending"},
+                    {sender:targetUserId,recipient:currentUserId,status:"pending"},
+                ],
+                status:"pending",
+            });
+            if (pendingRequest) {
+                if (pendingRequest.sender.toString() === currentUserId.toString()) {
+                  return res.status(200).json({ status: "requestSent" });
+                } else {
+                  return res.status(200).json({
+                    status: "requestReceived",
+                    requestId: pendingRequest._id, // This is what frontend needs to Accept/Reject
+                  });
+                }
+              }
+              
+
+            res.status(200).json({status:"notConnected"}); 
+        } catch (error) {
+            console.log("Error in Get Connection Status",error.message);
+            res.status(500).json({message:"Internal Server Error"});
+        }
     }
-}
