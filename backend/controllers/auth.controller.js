@@ -65,37 +65,45 @@ export const signup= async (req,res)=>{
 }
 
 //Login controller
-export const login= async (req,res)=>{
+export const login = async (req, res) => {
     try {
-        const {username,password}=req.body;
-        const user=await User.findOne({username});
-        //check if user exists
-        if(!user){
-            return res.status(400).json({message:"User does not exist"});
-        }
-
-        //check if password matches
-        const isMatch=await bcrypt.compare(password,user.password);
-        if(!isMatch){
-            return res.status(400).json({message:"Invalid Credentials"});
-        }
-
-        const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:"3d"});
-        res.cookie("jwt-connectin",token,
-            {
-                httpOnly:true, //prevents client side js from accessing the cookie k/a XSS attack
-                maxAge:3*24*60*60*1000,
-                sameSite:"strict", //prevents CSRF attack
-                secure:process.env.NODE_ENV==="production"
-            });
-
-        res.status(200).json({message:"Login successful"});
-        
+      const { username, password } = req.body;
+  
+      // Find user by username or email
+      const user = await User.findOne({
+        $or: [{ username }, { email: username }],
+      });
+  
+      // Check if user exists
+      if (!user) {
+        return res.status(400).json({ message: "User does not exist" });
+      }
+  
+      // Check if password matches
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Invalid Credentials" });
+      }
+  
+      const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "3d",
+      });      
+  
+      res.cookie("jwt-connectin", token, {
+        httpOnly: true,
+        maxAge: 3 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+      });
+  
+      res.status(200).json({ message: "Login successful" });
+  
     } catch (error) {
-        console.log("Error in Login",error.message);
-        res.status(500).json({message:"Internal Server Error"});
+      console.log("Error in Login", error.message);
+      res.status(500).json({ message: "Internal Server Error" });
     }
-}
+  };
+  
 
 //Logout controller
 export const logout=(req,res)=>{

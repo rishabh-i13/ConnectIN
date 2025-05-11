@@ -14,13 +14,25 @@ export const getUserNotifications = async (req, res) => {
 
 export const markNotificationAsRead = async (req, res) => {
     const notificationId = req.params.id;
+  
     try {
-       const notification = await Notification.findById({_id:notificationId,recipient:req.user._id},{read:true},{new:true}); 
-
+      const notification = await Notification.findOneAndUpdate(
+        { _id: notificationId, recipients: req.user._id },
+        { read: true },
+        { new: true }
+      );
+  
+      if (!notification) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+  
+      return res.status(200).json(notification);
     } catch (error) {
-        
+      console.error("Error marking notification as read:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
-};
+  };
+  
 
 export const deleteNotification=async(req,res)=>{
     const notificationId=req.params.id;
