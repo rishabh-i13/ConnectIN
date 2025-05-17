@@ -25,6 +25,7 @@
     "nodemailer": "^6.10.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "vite": "^5.0.0" 
   }
 }
