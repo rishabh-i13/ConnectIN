@@ -15,10 +15,12 @@ import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { IoSendSharp } from "react-icons/io5";
 import { FiLoader } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
+import { useParams } from "react-router-dom";
 
 const Post = ({ post }) => {
   const { data: authUser, isLoading } = useAuthUser();
   if (isLoading) return null;
+  const { postId } = useParams();
 
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -79,6 +81,7 @@ const Post = ({ post }) => {
     onSuccess: () => {
       setIsLiked(true); // set only on success
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },
     onError: (error) => {
       toast.error(error.message || "Error in liking post");
@@ -145,6 +148,18 @@ const Post = ({ post }) => {
     }
   };
 
+  const handleShare = () => {
+    const postLink = `${window.location.origin}/post/${post._id}`;
+    navigator.clipboard
+      .writeText(postLink)
+      .then(() => {
+        toast.success("Post link copied");
+      })
+      .catch(() => {
+        toast.error("Failed to copy link");
+      });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow mb-4">
       <div className="p-4">
@@ -183,7 +198,7 @@ const Post = ({ post }) => {
             </button>
           )}
         </div>
-        <p className="mb-4 text-black">{post.content}</p>
+        <p className="mb-4 text-black whitespace-pre-wrap">{post.content}</p>
         {post.image && (
           <img
             src={post.image}
@@ -210,7 +225,11 @@ const Post = ({ post }) => {
             text={`Comments (${comments.length})`}
             onClick={() => setShowComments(!showComments)}
           />
-          <PostAction icon={<FaShare size={18} />} text="Share" />
+          <PostAction
+            icon={<FaShare size={18} />}
+            text="Share"
+            onClick={handleShare}
+          />
         </div>
       </div>
 

@@ -1,18 +1,49 @@
 import Post from "../models/post.model.js";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
-import { sendCommentNotificationEmail } from "../emails/emailHandlers.js";
+// import { sendCommentNotificationEmail } from "../emails/emailHandlers.js";
 import { v2 as cloudinary } from "cloudinary";
 
+//OLDER ONE
+// export const getFeedPosts = async (req, res) => {
+//   try {
+//     const posts = await Post.find({
+//       author: { $in: [...req.user.connections, req.user._id] },
+//     })
+//       .populate("author", "name username profilePicture headline")
+//       .populate("comments.user", "name profilePicture")
+//       .sort({ createdAt: -1 });
+//     res.status(200).json(posts);
+//   } catch (error) {
+//     console.log("Error in Get Feed Posts", error.message);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+//NEW ONE FOR PAGINATION
 export const getFeedPosts = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const posts = await Post.find({
       author: { $in: [...req.user.connections, req.user._id] },
     })
       .populate("author", "name username profilePicture headline")
       .populate("comments.user", "name profilePicture")
-      .sort({ createdAt: -1 });
-    res.status(200).json(posts);
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments({
+      author: { $in: [...req.user.connections, req.user._id] },
+    });
+
+    res.status(200).json({
+      posts,
+      hasMore: skip + posts.length < totalPosts,
+    });
   } catch (error) {
     console.log("Error in Get Feed Posts", error.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -231,3 +262,20 @@ export const removeLikePost = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getPostsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const posts = await Post.find({ author: userId })
+      .populate("author", "name username profilePicture headline")
+      .populate("comments.user", "name username profilePicture")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("Error in Get Posts By User ID", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+

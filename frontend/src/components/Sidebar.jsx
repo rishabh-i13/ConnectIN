@@ -23,8 +23,8 @@ export default function Sidebar({ user }) {
 					/>
 					<h2 className='text-xl font-semibold mt-2 text-[#360072]'>{user.name}</h2>
 				</Link>
-				<p className='text-info text-'>{user.headline}</p>
-				<p className='text-info text-xs'>{user.connections.length} connections</p>
+				<p className='text-primary text-lg'>{user.headline}</p>
+				<p className='text-primary text-xs'>{user.connections.length} connections</p>
 			</div>
 			<div className='border-t border-base-100 p-4'>
 				<nav>

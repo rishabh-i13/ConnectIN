@@ -33,22 +33,22 @@ function PostCreation({ user }) {
   });
 
   const handleCreatePost = async () => {
-    const trimmedContent = content.trim();
-    if (!trimmedContent && !image) {
-      toast.error("Write something or upload an image to create a post.");
-      return;
-    }
+  const trimmedContent = content.trim(); // Only trims leading/trailing spaces
+  if (!trimmedContent && !image) {
+    toast.error("Write something or upload an image to create a post.");
+    return;
+  }
 
-    try {
-      const postData = { content: trimmedContent };
-      if (image) {
-        postData.image = await readFileAsDataURL(image);
-      }
-      createPostMutation(postData);
-    } catch (error) {
-      console.log("Error in Create Post: ", error);
+  try {
+    const postData = { content: trimmedContent };
+    if (image) {
+      postData.image = await readFileAsDataURL(image);
     }
-  };
+    createPostMutation(postData);
+  } catch (error) {
+    console.log("Error in Create Post: ", error);
+  }
+};
 
   const resetForm = () => {
     setContent("");

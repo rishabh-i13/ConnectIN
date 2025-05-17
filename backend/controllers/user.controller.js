@@ -42,10 +42,11 @@ export const updateProfile = async (req, res) => {
     const updatedData = {};
 
     for (const field of allowedFields) {
-      if (req.body[field]) {
+      if (req.body[field] !== undefined) {
         updatedData[field] = req.body[field];
       }
     }
+    
     //to check for the images - profile image and banner image
     if(req.body.profilePicture){
       const result = await cloudinary.uploader.upload(req.body.profilePicture);
