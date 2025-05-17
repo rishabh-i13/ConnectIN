@@ -1,7 +1,7 @@
 import ConnectionRequest from "../models/connectionRequest.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
-import {sendConnectionAcceptedEmail} from "../emails/emailHandlers.js";
+// import {sendConnectionAcceptedEmail} from "../emails/emailHandlers.js";
 
 export const sendConnectionRequest= async (req,res)=>{
     try {
@@ -76,16 +76,16 @@ export const acceptConnectionRequest=async(req,res)=>{
         await notification.save();
 
         //todo - send email
-        const senderEmail=request.sender.email;
-        const senderName=request.sender.name;
-        const recipientName=request.recipient.name;
-        const profileUrl=process.env.CLIENT_URL+"/profile/" +request.recipient.username;
+        // const senderEmail=request.sender.email;
+        // const senderName=request.sender.name;
+        // const recipientName=request.recipient.name;
+        // const profileUrl=process.env.CLIENT_URL+"/profile/" +request.recipient.username;
 
-        try {
-            await sendConnectionAcceptedEmail(senderEmail,senderName,recipientName,profileUrl);
-        } catch (error) {
-            console.log("Error in Send Connection Accepted Email",error.message);
-        }
+        // try {
+        //     await sendConnectionAcceptedEmail(senderEmail,senderName,recipientName,profileUrl);
+        // } catch (error) {
+        //     console.log("Error in Send Connection Accepted Email",error.message);
+        // }
 
         res.status(200).json({message:"Connection request accepted successfully"});
     } catch (error) {

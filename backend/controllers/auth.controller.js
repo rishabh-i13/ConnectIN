@@ -52,11 +52,11 @@ export const signup= async (req,res)=>{
 
         const profileURL=process.env.CLIENT_URL+"/profile/" +user.username;
 
-        try {
-            await sendWelcomeMail(user.email,user.name,profileURL);
-        } catch (emailError) {
-            console.error("Error Sending Welcome Mail",emailError);
-        }
+        // try {
+        //     await sendWelcomeMail(user.email,user.name,profileURL);
+        // } catch (emailError) {
+        //     console.error("Error Sending Welcome Mail",emailError);
+        // }
 
     } catch (error) {
         console.log("Error in SignUp",error.message)

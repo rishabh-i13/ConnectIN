@@ -1,5 +1,5 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useRef, useCallback } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { useAuthUser } from "../lib/hooks";
 import Sidebar from "../components/Sidebar";
@@ -7,9 +7,11 @@ import PostCreation from "../components/PostCreation";
 import Post from "../components/Post";
 import { FaUserAlt } from "react-icons/fa";
 import RecommendedUser from "../components/RecommendedUser";
+import { Loader } from "lucide-react";
 
 const HomePage = () => {
   const { data: authUser, isLoading } = useAuthUser();
+  const observerRef = useRef();
 
   const { data: recommendedUsers } = useQuery({
     queryKey: ["recommendedUsers"],
@@ -19,16 +21,41 @@ const HomePage = () => {
     },
   });
 
-  const { data: posts } = useQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: postsLoading,
+  } = useInfiniteQuery({
     queryKey: ["posts"],
-    queryFn: async () => {
-      const res = await axiosInstance.get("/posts");
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await axiosInstance.get(`/posts?page=${pageParam}&limit=10`);
       return res.data;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
   });
 
-  console.log("Rusers", recommendedUsers);
-  console.log("ppposts", posts);
+  const posts = data?.pages.flatMap((page) => page.posts) || [];
+
+  const lastPostRef = useCallback(
+    (node) => {
+      if (postsLoading || isFetchingNextPage) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [postsLoading, isFetchingNextPage, hasNextPage, fetchNextPage]
+  );
+
   return (
     <div className="h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Left Sidebar - Fixed */}
@@ -41,11 +68,22 @@ const HomePage = () => {
       {/* Middle Content - Scrollable */}
       <div className="col-span-1 lg:col-span-2 order-first lg:order-none h-full overflow-y-auto pr-2">
         <PostCreation user={authUser} />
-        {posts?.map((post) => (
-          <Post key={post._id} post={post} />
+        {posts?.map((post, index) => (
+          <div
+            key={post._id}
+            ref={index === posts.length - 1 ? lastPostRef : null}
+          >
+            <Post post={post} />
+          </div>
         ))}
 
-        {posts?.length === 0 && (
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Loader className="animate-spin text-[#360072]" size={24} />
+          </div>
+        )}
+
+        {posts?.length === 0 && !postsLoading && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <div className="mb-6">
               <FaUserAlt size={64} className="mx-auto text-blue-500" />

@@ -5,7 +5,8 @@
   "main": "backend/server.js",
   "scripts": {
     "dev": "nodemon backend/server.js",
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +21,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mailtrap": "^3.4.0",
-    "mongoose": "^8.9.6"
+    "mongoose": "^8.9.6",
+    "nodemailer": "^6.10.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
